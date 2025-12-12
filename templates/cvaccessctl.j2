@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-#WARNING: THIS SCRIPT IS RUN AS SUPERUSER
-$user="{{cvaccess_user}}"
+# This script must be run as superuser!
+user="{{cvaccess_user}}"
 
 if [ "$1" = "unmount" ]; then
     fusermount3 -u "/home/$user/vault"
