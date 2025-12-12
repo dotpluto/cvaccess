@@ -7,7 +7,7 @@ Type=notify
 User={{cvaccess_user}}
 ExecStart= \
 /usr/bin/rclone mount cvaccess:cvaccess /home/{{cvaccess_user}}/vault \
---allow-other \
+--allow-root \
 --default-permissions \
 --umask 0022 \
 --vfs-cache-mode full \
