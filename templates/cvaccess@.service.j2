@@ -4,19 +4,20 @@ Wants=network-online.target
 
 [Service]
 Type=notify
-User={{cvaccess_user}}
+User=%i
 ExecStart= \
-/usr/bin/rclone mount cvaccess:cvaccess /home/{{cvaccess_user}}/vault \
+/usr/bin/rclone mount cvaccess:cvaccess /home/%i/vault \
 --allow-root \
 --default-permissions \
 --umask 0022 \
 --vfs-cache-mode full \
 --vfs-cache-max-size 100M \
 --log-level INFO \
---log-file /home/{{cvaccess_user}}/cvaccess/rclone.log \
---config /home/{{cvaccess_user}}/cvaccess/rclone.conf
+--log-file /home/%i/.cvaccess/rclone.log \
+--config /home/%i/.cvaccess/rclone.conf
 
-ExecStop=fusermount3 -u /home/{{cvaccess_user}}/vault
+ExecStop=fusermount3 -u /home/%i/vault
+
 
 [Install]
 WantedBy=default.target
