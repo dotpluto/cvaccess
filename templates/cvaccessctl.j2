@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+#WARNING: THIS SCRIPT IS RUN AS SUPERUSER
+$user="{{cvaccess_user}}"
+
+if [ "$1" = "unmount" ]; then
+    fusermount3 -u "/home/$user/vault"
+elif [ "$1" = "restart" ]; then
+    sudo systemctl restart cvaccess
+    ret=$?
+    if [ "$ret" = "1" ]; then
+	sudo systemctl status cvaccess
+    fi
+else
+    echo "No valid command found."
+fi
+

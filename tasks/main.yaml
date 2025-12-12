@@ -3,83 +3,34 @@
   become: true
   ansible.builtin.apt:
     name: rclone
-- name: Stopping mount if it's running
+- name: deleting leftover control script
+  become: true
+  ansible.builtin.file:
+    path: /usr/local/bin/rclone_personal_vault_ctl
+    state: absent
+- name: deleting leftover backup script
+  become: true
+  ansible.builtin.file:
+    path: /usr/local/bin/backup-vault
+    state: absent
+- name: installing new control script
+  become: true
+  ansible.builtin.template: 
+    src: cvaccessctl.j2
+    dest: /usr/local/bin/cvaccessctl
+    mode: "0744"
+- name: adding systemd mount service file 
+  become: true
+  ansible.builtin.template:
+    src: cvaccess.service.j2
+    dest: /etc/systemd/system/cvaccess.service
+    mode: "0744"
+- name: reloading systemctl unit files
   become: true
   ansible.builtin.command:
-    cmd: "fusermount3 -u /home/{{ item }}/vault"
-  loop: "{{rclone_personal_vault_users}}"
-  ignore_errors: true
-- name: Ensuring mount points exist
+    cmd: systemctl daemon-reload
+- name: enabling cvaccess service
   become: true
-  ansible.builtin.file:
-    path: "/home/{{ item }}/vault"
-    state: directory
-    mode: "0700"
-    owner: "{{ item }}"
-    group: "{{ item }}"
-  loop: "{{ rclone_personal_vault_users }}"
-- name: Making sure rclone_personal_vault group exists
-  become: true
-  ansible.builtin.group:
-    name: "{{ rclone_personal_vault_group }}"
-    state: present
-- name: Making sure rclone_personal_vault_dir exists
-  become: true
-  ansible.builtin.file:
-    path: "{{ rclone_personal_vault_dir }}"
-    state: directory
-    owner: root
-    group: "{{ rclone_personal_vault_group }}"
-    mode: "0770"
-- name: Adding template service
-  become: true
-  ansible.builtin.template:
-    src: rclone_personal_vault@.service.j2
-    dest: /etc/systemd/system/rclone_personal_vault@.service
-    mode: "0777"
-- name: Make users able to share mount
-  become: true
-  ansible.builtin.lineinfile:
-    state: present
-    path: /etc/fuse.conf
-    line: "user_allow_other"
-- name: Adding backup script to /usr/local/bin
-  become: true
-  ansible.builtin.template:
-    src: backup-vault.j2
-    dest: /usr/local/bin/backup-vault
-    owner: root
-    group: "{{ rclone_personal_vault_group }}"
-    mode: "2755"
-- name: Adding management script to /usr/local/bin
-  become: true
-  ansible.builtin.template:
-    src: "rclone_personal_vault_ctl.j2"
-    dest: /usr/local/bin/rclone_personal_vault_ctl
-    owner: root
-    group: "{{ rclone_personal_vault_group }}"
-    mode: "2555"
-- name: Ensuring backup folder has appropriate permissions
-  become: true
-  ansible.builtin.file:
-    path: "{{ rclone_personal_vault_dir }}/backup"
-    state: directory
-    mode: "2770"
-    group: "{{ rclone_personal_vault_group }}"
-    owner: root
-- name: Reloading services
-  become: true
-  ansible.builtin.systemd_service:
-    daemon_reload: true
-- name: Enabling the service
-  become: true
-  ansible.builtin.systemd_service:
+  ansible.builtin.service:
+    name: cvaccess
     enabled: true
-    name: rclone_personal_vault@{{ item }}.service
-  loop: "{{ rclone_personal_vault_users }}"
-- name: Starting the service
-  become: true
-  ansible.builtin.systemd_service:
-    state: started
-    name: rclone_personal_vault@{{ item }}.service
-  loop: "{{ rclone_personal_vault_users }}"
