@@ -3,16 +3,6 @@
   become: true
   ansible.builtin.apt:
     name: rclone
-- name: deleting leftover control script
-  become: true
-  ansible.builtin.file:
-    path: /usr/local/bin/rclone_personal_vault_ctl
-    state: absent
-- name: deleting leftover backup script
-  become: true
-  ansible.builtin.file:
-    path: /usr/local/bin/backup-vault
-    state: absent
 - name: installing new control script
   become: true
   ansible.builtin.template: 
