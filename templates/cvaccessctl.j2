@@ -1,16 +1,51 @@
 #!/usr/bin/env bash
 # This script must be run as superuser!
-user="$(id -nu "$SUDO_UID")"
+
+red_escape='\033[0;31m'
+clear_escape='\033[0m'
+
+error_msg() {
+    echo -e "${red_escape}${1}${clear_escape}"
+}
+
+user="$(whoami)"
+if [ "$user" = "root" ]; then
+    error_msg "This script must be ran as a vault user."
+    exit 1
+fi
 service="cvaccess@$user"
+
+home_dir="/home/$user"
+
+backups_dir="$home_dir/.cvaccess/backups"
+
 
 if [ "$1" = "unmount" ]; then
     fusermount3 -u "/home/$user/vault"
 elif [ "$1" = "restart" ]; then
     sudo systemctl restart $service 
-    ret=$?
-    if [ "$ret" = "1" ]; then
+    if [ ! "$?" = "0" ]; then
 	sudo systemctl status $service 
     fi
+elif [ "$1" = "backup" ]; then
+{% if cvaccess_enable_backups != true %}{{ "    " -}}
+    error_msg "Backups weren't enabled during cvaccess installation."
+{% else -%}{{ "    " -}}
+    if [ ! -f "/home/$user/vault/credentials.kdbx" ]; then
+	error_msg "Vault doesn't seem to be mounted currently."
+	exit 1
+    else
+	result=$(borg init --encryption=none "$backups_dir" 2>&1)
+	if [ ! "$?" = "2" ]; then
+	    error_msg "$result"
+	    exit 1
+	fi
+	mkdir -p /tmp/cvaccess/
+	cp -r "$home_dir/vault" /tmp/cvaccess/vault
+	borg create "$backups_dir::{now}" "/tmp/cvaccess/./vault/"
+	rm -r /tmp/cvaccess
+    fi
+{% endif -%}
 else
-    echo "No valid command found."
+    error_msg "No valid command found."
 fi

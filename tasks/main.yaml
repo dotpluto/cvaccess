@@ -3,12 +3,17 @@
   become: true
   ansible.builtin.apt:
     name: rclone
+- name: Ensuring borg backup is installed
+  become: true
+  ansible.builtin.apt:
+    name: borgbackup
+  when: cvaccess_enable_backups == true
 - name: installing new control script
   become: true
   ansible.builtin.template: 
     src: cvaccessctl.j2
     dest: /usr/local/bin/cvaccessctl
-    mode: "0744"
+    mode: "0755"
 - name: adding systemd mount service file 
   become: true
   ansible.builtin.template:
