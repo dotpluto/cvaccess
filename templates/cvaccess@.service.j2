@@ -17,6 +17,7 @@ ExecStart= \
 --config /home/%i/.cvaccess/rclone.conf
 
 ExecStop=fusermount3 -u /home/%i/vault
+TimeoutStartSec=infinity
 
 
 [Install]
