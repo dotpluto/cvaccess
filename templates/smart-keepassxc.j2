@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 if [ ! -e ~/vault/credentials.kdbx ]; then
-    #alacritty -e bash -c "echo \"The database isn't mounted yet. Bad luck for you.\"; read"
+{% if cvaccess_enable_backups != true %}{{ "    " -}}
+    zenity --info --text "The database is currently not mounted. cvaccess doesn't have backup support enabled."
+{% else -%}{{ "    " -}}
     zenity --question --text "The password database isn't mounted yet. Do you want to access a backup?"
     if [ "$?" == "0" ]; then
 	latest=$(borg list --last 1 --sort-by timestamp --format "{archive}" ~/.cvaccess/backups/)
@@ -16,6 +18,7 @@ if [ ! -e ~/vault/credentials.kdbx ]; then
 	    cd $cur_dir
 	fi
     fi
+{% endif -%}
 else
     exec keepassxc ~/vault/credentials.kdbx
 fi
