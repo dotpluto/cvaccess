@@ -9,7 +9,6 @@ ExecStartPre= \
 rm /home/%i/.cvaccess/rclone.log
 ExecStart= \
 /usr/bin/rclone mount cvaccess:cvaccess /home/%i/vault \
---allow-root \
 --default-permissions \
 --umask 0022 \
 --vfs-cache-mode full \
