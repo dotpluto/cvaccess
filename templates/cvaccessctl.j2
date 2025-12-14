@@ -8,15 +8,21 @@ error_msg() {
     echo -e "${red_escape}${1}${clear_escape}"
 }
 
+show_help() {
+    echo "USAGE"
+    echo "Unmount vault: cvaccessctl unmount"
+    echo "Restart vault: cvaccessctl restart"
+    echo "Backup vault: cvaccessctl backup"
+    echo "Print help: cvaccessctl help"
+}
+
 user="$(whoami)"
 if [ "$user" = "root" ]; then
     error_msg "This script must be ran as a vault user."
     exit 1
 fi
 service="cvaccess@$user"
-
 home_dir="/home/$user"
-
 backups_dir="$home_dir/.cvaccess/backups"
 
 
@@ -47,6 +53,9 @@ elif [ "$1" = "backup" ]; then
 	borg prune "$backups_dir" --keep-last 5
     fi
 {% endif -%}
+elif [ "$1" = "help" ]; then
+    show_help
 else
-    error_msg "No valid command found."
+    error_msg "That is not a valid subcommand."
+    show_help
 fi
