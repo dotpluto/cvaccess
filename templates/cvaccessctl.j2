@@ -43,7 +43,7 @@ elif [ "$1" = "backup" ]; then
 	mkdir -p /tmp/cvaccess/
 	cp -r "$home_dir/vault" /tmp/cvaccess/vault
 	borg create "$backups_dir::{now}" "/tmp/cvaccess/./vault/"
-	rm -r /tmp/cvaccess
+	rm -r /tmp/cvaccess/vault
 	borg prune "$backups_dir" --keep-last 5
     fi
 {% endif -%}

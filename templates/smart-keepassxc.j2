@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+if [ ! -e ~/vault/credentials.kdbx ]; then
+    #alacritty -e bash -c "echo \"The database isn't mounted yet. Bad luck for you.\"; read"
+    zenity --question --text "The password database isn't mounted yet. Do you want to access a backup?"
+    if [ "$?" == "0" ]; then
+	latest=$(borg list --last 1 --sort-by timestamp --format "{archive}" ~/.cvaccess/backups/)
+	if [ "$latest" == "" ]; then
+	    zenity --info "There don't seem to be any backups."
+	else
+	    mkdir -p /tmp/cvaccess/extracted
+	    cur_dir=$(pwd)
+	    cd /tmp/cvaccess/extracted
+	    borg extract "$HOME/.cvaccess/backups/::$latest" --strip-components 3
+	    keepassxc /tmp/cvaccess/extracted/credentials.kdbx
+	    rm -r /tmp/cvaccess/extracted
+	    cd $cur_dir
+	fi
+    fi
+else
+    exec keepassxc ~/vault/credentials.kdbx
+fi
